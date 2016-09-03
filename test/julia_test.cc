@@ -166,15 +166,17 @@ TEST(julia_test, julia_test_2)
     }
   };
 
+  print_array(exp, width, height);
+
   julia(200, 200, 203, 202, -0.7, 0.27016, total_width, total_height, zoom_amt, x_off, y_off, max_itrs, res);
 
   for (; i < height; ++i) {
     for (j = 0; j < width; ++j) {
       for (k = 0; k < 4; ++k) {
-        printf("i: %d j: %d k: %d | ", i, j, k);
-        double v = get_value_from_3d_ary((double*)exp, width, height, 4, j, i, k);
-        printf("%f\n", v);
-        //EXPECT_NEAR(res[(height * 4 * i) + (4 * j) + k], exp[i][j][k], err_margin);
+        //printf("i: %d j: %d k: %d | ", i, j, k);
+        //double v = get_value_from_3d_ary((double*)exp, width, height, 4, j, i, k);
+        //printf("%f\n", v);
+        ////EXPECT_NEAR(res[(height * 4 * i) + (4 * j) + k], exp[i][j][k], err_margin);
       }
     }
   }

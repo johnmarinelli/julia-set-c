@@ -2,4 +2,6 @@ runtests
 julia
 *.o
 dev/objfiles
+test_julia
+*.png
 

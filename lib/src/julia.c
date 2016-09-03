@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "png_write.h"
 #include "julia.h"
 
 // Calculate modulus of a complex number
@@ -65,13 +66,20 @@ void complex_heat_map(uint itrs, double min, double max, double zmod, double rad
   rgba[3] = abs((int)roundl(255.0 * (zmod_div_radius > 1.0 ? 1.0 : zmod_div_radius)) % 256);
 }
 
+void write_color_to_img(bitmap_t* img, double* rgba, uint x, uint y) {
+  color_t* color = color_at(img, x, y);
+  color->r = (int)rgba[0];
+  color->g = (int)rgba[1];
+  color->b = (int)rgba[2];
+}
+
 void julia(uint start_x, uint start_y, 
     uint end_x, uint end_y, 
     double rc, double ic, 
     uint total_width, uint total_height, 
     double zoom_amt, double x_off, double y_off,
     uint max_itrs,
-    double* colors) {
+    bitmap_t* img) {
   const int width = end_x - start_x;
   const int height = end_y - start_y;
   double radius = calculate_r(rc, ic);
@@ -85,20 +93,21 @@ void julia(uint start_x, uint start_y,
   int itrs = 0;
 
   int y = start_y,
-      x = start_x;
+      x;
 
   double* res[width * height * 4];
 
   for (; y < end_y; ++y) {
-    for (; x < end_x; ++x) {
+    for (x = start_x; x < end_x; ++x) {
       norm_coords(x, y, r_min, x_step, y_step, zoom_amt, x_off, y_off, new_coords);
       itrs = sq_poly_iteration(new_coords[0], new_coords[1], rc, ic, radius, max_itrs);
       complex_heat_map(itrs, 0, max_itrs, zmod, radius, rgba);
+      write_color_to_img(img, rgba, x, y);
 
-      int colors_y_offset = y - start_y;
-      int colors_x_offset = x - start_x;
+      //int colors_y_offset = y - start_y;
+      //int colors_x_offset = x - start_x;
       //res[(width * colors_y_offset) + colors_x_offset] = rgba;
-      memcpy(&colors[(width * colors_y_offset) + colors_x_offset], &rgba, sizeof(rgba));
+      //memcpy(&colors[(width * colors_y_offset) + colors_x_offset], &rgba, sizeof(rgba));
     }
   }
 }

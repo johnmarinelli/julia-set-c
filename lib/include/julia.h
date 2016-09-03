@@ -3,6 +3,12 @@
 
 #include "types.h"
 
+
+/*
+ * Forward declarations
+ */
+struct bitmap_t;
+
 // Contains math functions related to calculating julia set.
 double c_modulus(double, double);
 void c_add(double, double, double, double, double*);
@@ -22,6 +28,6 @@ void julia(uint, uint,
     uint, uint,
     double, double, double,
     uint,
-    double*);
+    bitmap_t*);
 
 #endif
