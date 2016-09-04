@@ -1,28 +1,7 @@
 #include <cstdlib>
 #include "gtest/gtest.h"
 #include "julia.h"
-
-double get_value_from_3d_ary(double* arr, uint w, uint h, uint d, uint x, uint y, uint z) {
-  return *(arr + (y * w + x) + (z * (w * h)));
-}
-
-void print_array(double* arr, uint w, uint h, uint d) {
-  uint i,
-       j,
-       k;
-
-  for (k = 0; k < d; ++k) {
-    for (i = 0; i < h; ++i) {
-      for (j = 0; j < w; ++j) {
-        printf("i: %d j: %d k: %d | ", i, j, k);
-        printf("%f\n", get_value_from_3d_ary(arr, w, h, d, j, i, k));
-      }
-      printf("\n");
-    }
-  }
-}
-
-const double err_margin = 1e-5;
+#include "test_helpers.h"
 
 /*
  * COMPLEX NUMBERS RELATED TESTS
@@ -98,54 +77,57 @@ TEST(julia_test, complex_heat_map_test)
   EXPECT_NEAR(res[2], exp[2], err_margin);
   EXPECT_NEAR(res[3], exp[3], err_margin);
 }
-/*
+
 TEST(julia_test, julia_test)
 {
-  const int width = 1;
-  const int height = 1;
+  const uint width = 1;
+  const uint height = 1;
   const int total_width = 400;
   const int total_height = 400;
   const double zoom_amt = 1.1;
   const double x_off = 0.1;
   const double y_off = 0.1;
   const int max_itrs = 300;
+  uint i, j;
 
-  double exp[width][height][4] = { 
-    {
-      {255.0, 89.0, 166.0, 128.0}
-    }
+  double exp[width * height][4] = {
+    {255.0, 89.0, 166.0, 128.0}
   };
 
-  double* res;
-  res = (double*)malloc(width * height * 4 * sizeof(double));
+  bitmap_t res;
+  res.width = width;
+  res.height = height;
+  res.pixels = (color_t*) malloc(res.width * res.height * sizeof(color_t));
 
-  julia(200, 200, 201, 201, -0.7, 0.27015, total_width, total_height, zoom_amt, x_off, y_off, max_itrs, res);
+  julia(200, 200, 201, 201, -0.7, 0.27015, total_width, total_height, zoom_amt, x_off, y_off, max_itrs, &res);
 
-  EXPECT_NEAR(res[0], exp[0][0][0], err_margin);
-  EXPECT_NEAR(res[1], exp[0][0][1], err_margin);
-  EXPECT_NEAR(res[2], exp[0][0][2], err_margin);
-  EXPECT_NEAR(res[3], exp[0][0][3], err_margin);
+  for (i = 0; i < height; ++i) {
+    for (j = 0; j < width; ++j) {
+      color_t* col = pixel_at(&res, j,i);
+      double rgba[4] = { col->r, col->g, col->b, col->a };
 
-  free(res);
-}*/
+      uint k = 0;
+      for (; k < 4; ++k) {
+        double* f = exp[i * width + j];
+        double e = *(f + k);
+        EXPECT_NEAR(e, rgba[k], err_margin);
+      }
+    }
+  }
 
-static color_t* pixel_at (bitmap_t * bitmap, int x, int y)
-{
-    return bitmap->pixels + bitmap->width * y + x;
+  free(res.pixels);
 }
-    
 
 TEST(julia_test, julia_test_2) 
 {
-  const int width = 4;
-  const int height = 3;
+  const uint width = 4;
+  const uint height = 3;
   const int total_width = 400;
   const int total_height = 400;
   const double zoom_amt = 1.0;
   const double x_off = 0.0;
   const double y_off = 0.0;
   const int max_itrs = 300;
-  const int total_size = width * height * 4;
 
   uint i,
        j,
@@ -178,7 +160,6 @@ TEST(julia_test, julia_test_2)
       color_t* col = pixel_at(&res, j,i);
       double rgba[4] = { col->r, col->g, col->b, col->a };
 
-      uint k = 0;
       for (; k < 4; ++k) {
         double* f = exp[i * width + j];
         double e = *(f + k);
