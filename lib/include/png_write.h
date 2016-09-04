@@ -4,18 +4,6 @@
 #include <png.h>
 #include "types.h"
 
-/* Colored pixel */
-typedef struct {
-    uint8_t r, g, b;
-} color_t;
-
-/* Picture */
-typedef struct {
-  color_t* pixels;
-  size_t width,
-         height;
-} bitmap_t;
-
 /* Given "bitmap", this returns the pixel of bitmap at the point 
    ("x", "y"). */
 static color_t* color_at (bitmap_t* bitmap, int x, int y)

@@ -2,13 +2,6 @@
 #include "png_write.h"
 #include "julia.h"
 
-static int pix(int value, int max) {
-  if (value < 0) {
-    return 0;
-  }
-  return (int) (256.0 * ((double) (value) / (double) max));
-}
-
 int main(int argc, char* args[]) {
   bitmap_t pic;
   int x, y;
