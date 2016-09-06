@@ -15,7 +15,7 @@ compile: main.o julia.o
 	$(GCC) -c $(OBJFILES_DIR)/main.o $(OBJFILES_DIR)/julia.o
 
 bench: julia.o
-	$(GCC) -I$(INCLUDE_DIR) -Ibenchmark/ $(SRCS_DIR)/julia/julia.c benchmark/bench_all.c $(CFLAGS) -o $(OUTPUT_BENCH_BIN_NAME)
+	$(GCC) -I$(INCLUDE_DIR) -Ibenchmark/ $(SRCS_DIR)/julia/julia.c benchmark/bench_all.c $(CFLAGS) -O0 -o $(OUTPUT_BENCH_BIN_NAME)
 
 test: julia.o
 	$(GPP) -I$(INCLUDE_DIR) -I$(GTEST_DIR)/include test/testmain.cc test/julia_test.cc $(SRCS_DIR)/julia/julia.c $(GTEST_ARCHIVE) $(GTEST_MAIN_ARCHIVE) $(CFLAGS) -lpthread -o $(OUTPUT_TEST_BIN_NAME)
