@@ -2,7 +2,10 @@
 #define PNG_WRITE_H
 
 #include <png.h>
-#include "types.h"
+#include "julia/types.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 /* Given "bitmap", this returns the pixel of bitmap at the point 
    ("x", "y"). */
@@ -58,10 +61,10 @@ static int save_png_to_file(bitmap_t* bitmap, const char* path) {
     
   /* Initialize rows of PNG. */
 
-  row_pointers = png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
+  row_pointers = (png_byte**) png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
   for (y = 0; y < bitmap->height; y++) {
     png_byte *row = 
-        png_malloc (png_ptr, sizeof (uint8_t) * bitmap->width * pixel_size);
+        (png_byte*) png_malloc (png_ptr, sizeof (uint8_t) * bitmap->width * pixel_size);
     row_pointers[y] = row;
     for (x = 0; x < bitmap->width; x++) {
       color_t* pixel = color_at(bitmap, x, y);

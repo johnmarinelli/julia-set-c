@@ -1,7 +1,7 @@
 #ifndef TEST_HELPERS_H
 #define TEST_HELPERS_H
 
-#include "types.h"
+#include "julia/types.h"
 const double err_margin = 1e-5;
 
 inline double get_value_from_3d_ary(double* arr, uint w, uint h, uint d, uint x, uint y, uint z) {
@@ -24,8 +24,7 @@ void print_3d_ary(double* arr, uint w, uint h, uint d) {
   }
 }
 
-static color_t* pixel_at (bitmap_t * bitmap, int x, int y)
-{
+static color_t* pixel_at (bitmap_t * bitmap, int x, int y) {
     return bitmap->pixels + bitmap->width * y + x;
 }
 

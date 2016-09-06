@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "png_write.h"
-#include "julia.h"
+#include "png/png_write.h"
+#include "julia/julia.h"
 
 int main(int argc, char* args[]) {
   bitmap_t pic;

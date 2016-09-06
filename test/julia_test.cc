@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include "gtest/gtest.h"
-#include "julia.h"
+#include "julia/julia.h"
 #include "test_helpers.h"
 
 /*
@@ -91,7 +91,7 @@ TEST(julia_test, julia_test)
   uint i, j;
 
   double exp[width * height][4] = {
-    {255.0, 89.0, 166.0, 128.0}
+    {255.0, 89.0, 166.0}
   };
 
   bitmap_t res;
@@ -104,7 +104,7 @@ TEST(julia_test, julia_test)
   for (i = 0; i < height; ++i) {
     for (j = 0; j < width; ++j) {
       color_t* col = pixel_at(&res, j,i);
-      double rgba[4] = { col->r, col->g, col->b, col->a };
+      double rgba[4] = { col->r, col->g, col->b };
 
       uint k = 0;
       for (; k < 4; ++k) {
@@ -139,18 +139,18 @@ TEST(julia_test, julia_test_2)
   res.pixels = (color_t*) malloc(res.width * res.height * sizeof(color_t));
 
   double exp[width * height][4] = {
-    {255.0, 81.00, 174.0, 128.0},
-    {255.0, 81.00, 174.0, 128.0},
-    {255.0, 78.00, 177.0, 128.0},
-    {255.0, 76.00, 179.0, 128.0},
-    {255.0, 82.00, 173.0, 128.0},
-    {255.0, 82.00, 173.0, 128.0},
-    {255.0, 144.0, 111.0, 128.0},
-    {255.0, 255.0,  0.00, 128.0},
-    {255.0, 83.00, 172.0, 128.0},
-    {255.0, 85.00, 170.0, 128.0},
-    {255.0, 255.0,  0.00, 128.0},
-    {255.0, 156.0,  99.0, 128.0}
+    {255.0, 81.00, 174.0},
+    {255.0, 81.00, 174.0},
+    {255.0, 78.00, 177.0},
+    {255.0, 76.00, 179.0},
+    {255.0, 82.00, 173.0},
+    {255.0, 82.00, 173.0},
+    {255.0, 144.0, 111.0},
+    {255.0, 255.0,  0.00},
+    {255.0, 83.00, 172.0},
+    {255.0, 85.00, 170.0},
+    {255.0, 255.0,  0.00},
+    {255.0, 156.0,  99.0}
   };
 
   julia(200, 200, 200 + width, 200 + height, -0.7, 0.27016, total_width, total_height, zoom_amt, x_off, y_off, max_itrs, &res);
@@ -158,7 +158,7 @@ TEST(julia_test, julia_test_2)
   for (i = 0; i < height; ++i) {
     for (j = 0; j < width; ++j) {
       color_t* col = pixel_at(&res, j,i);
-      double rgba[4] = { col->r, col->g, col->b, col->a };
+      double rgba[4] = { col->r, col->g, col->b };
 
       for (; k < 4; ++k) {
         double* f = exp[i * width + j];

@@ -3,5 +3,6 @@ julia
 *.o
 dev/objfiles
 test_julia
+bench_julia
 *.png
 
