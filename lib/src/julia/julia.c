@@ -51,14 +51,16 @@ void complex_heat_map(uint itrs, double min, double max, double zmod, double rad
   rgba[3] = abs((int)roundl(255.0 * (zmod_div_radius > 1.0 ? 1.0 : zmod_div_radius)) % 256);
 }
 
-/*
-void write_color_to_img(bitmap_t* img, double* rgba, uint x, uint y) {
-  color_t* color = color_at(img, x, y);
-  color->r = (int)rgba[0];
-  color->g = (int)rgba[1];
-  color->b = (int)rgba[2];
+// Critical section.
+void insert_to_ary(bitmap_t* bitmap, uint x_offset, uint y_offset, double* rgba, pthread_mutex_t* mtx) {
+  pthread_mutex_lock(mtx);
+  color_t* px = bitmap->pixels + bitmap->width * y_offset + x_offset;
+
+  px->r = rgba[0];
+  px->g = rgba[1];
+  px->b = rgba[2];
+  pthread_mutex_unlock(mtx);
 }
-*/
 
 void julia(uint start_x, uint start_y, 
     uint end_x, uint end_y, 
@@ -66,7 +68,8 @@ void julia(uint start_x, uint start_y,
     uint total_width, uint total_height, 
     double zoom_amt, double x_off, double y_off,
     uint max_itrs,
-    bitmap_t* bitmap) {
+    bitmap_t* bitmap,
+    pthread_mutex_t* mtx) {
   double radius = calculate_r(rc, ic);
   double r_min = radius * -1;
   double r_max = radius;
@@ -86,14 +89,74 @@ void julia(uint start_x, uint start_y,
       itrs = sq_poly_iteration(new_coords[0], new_coords[1], rc, ic, radius, max_itrs);
       complex_heat_map(itrs, 0, max_itrs, zmod, radius, rgba);
       
-      int y_offset = y - start_y;
       int x_offset = x - start_x;
+      int y_offset = y - start_y;
 
-      color_t* px = bitmap->pixels + bitmap->width * y_offset + x_offset;
-
-      px->r = rgba[0];
-      px->g = rgba[1];
-      px->b = rgba[2];
+      insert_to_ary(bitmap, x_offset, y_offset, rgba, mtx);
     }
   }
 }
+
+/* main() for a thread */
+void* thread_fn(void* vargs) {
+  thread_fn_args* args = (thread_fn_args*) vargs;
+  julia(args->start_x, args->start_y, 
+      args->end_x, args->end_y, 
+      args->rc, args->ic, 
+      args->total_width, args->total_height, 
+      args->zoom_amt, 
+      args->x_off, args->y_off, 
+      args->max_itrs, 
+      args->bitmap,
+      args->mtx);
+}
+
+void start(uint total_width, uint total_height, 
+    double rc, double ic,
+    double zoom_amt, 
+    double x_off, double y_off,
+    uint max_itrs) {
+  bitmap_t pic;
+  uint start_x = 0;
+  uint start_y = 0;
+  uint end_x = total_width;
+  uint end_y = total_height;
+
+  const uint NUM_THREADS = 4;
+
+  // todo: implement map & reduce
+
+  pthread_t t_hnd;
+  pthread_mutex_t mtx;
+  
+  thread_fn_args thread_args;
+
+  thread_args.mtx = &mtx;
+  thread_args.start_x = start_x;
+  thread_args.start_y = start_y;
+  thread_args.end_x = end_x;
+  thread_args.end_y = end_y;
+  thread_args.total_width = total_width; 
+  thread_args.total_height = total_height; 
+  thread_args.rc = rc; 
+  thread_args.ic = ic; 
+  thread_args.zoom_amt = zoom_amt; 
+  thread_args.x_off = x_off; 
+  thread_args.y_off = y_off; 
+  thread_args.max_itrs = max_itrs; 
+  thread_args.bitmap = &pic;
+
+  pic.width = total_width;
+  pic.height = total_height;
+
+  pic.pixels = calloc(pic.width * pic.height, sizeof(color_t));
+
+  pthread_mutex_init(&mtx, NULL);
+  pthread_create(&t_hnd, NULL, thread_fn, &thread_args);
+
+  pthread_join(t_hnd, NULL);
+
+  save_png_to_file(&pic, "pic.png");
+  free(pic.pixels);
+}
+

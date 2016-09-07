@@ -18,6 +18,13 @@ void julia(uint, uint,
     uint, uint,
     double, double, double,
     uint,
-    bitmap_t*);
+    bitmap_t*,
+    pthread_mutex_t*);
+
+void start(uint, uint, 
+    double, double,
+    double,
+    double, double, 
+    uint);
 
 #endif
