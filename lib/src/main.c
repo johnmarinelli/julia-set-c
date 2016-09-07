@@ -5,10 +5,10 @@
 int main(int argc, char* args[]) {
   bitmap_t pic;
   int x, y;
-  const uint width = 400,
-        height = 400,
-        total_width = 400,
-        total_height = 400,
+  const uint width = 1000,
+        height = 1000,
+        total_width = 1000,
+        total_height = 1000,
         start_x = 0,
         start_y = 0,
         end_x = start_x + width,
