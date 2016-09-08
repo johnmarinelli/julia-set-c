@@ -7,6 +7,8 @@
 #include "julia/types.h"
 #include "julia/julia.h"
 
+//uint c = 0;
+
 void norm_coords(uint x, uint y, 
     double r_min, 
     double x_step, double y_step, 
@@ -36,6 +38,7 @@ uint sq_poly_iteration(double r0, double i0, double rc, double ic, double radius
     last_zr = b[0];
     last_zi = b[1];
     dis = c_modulus(last_zr, last_zi);
+//    ++c;
     ++i;
   }
 
@@ -155,6 +158,8 @@ void start(uint total_width, uint total_height,
   pthread_create(&t_hnd, NULL, thread_fn, &thread_args);
 
   pthread_join(t_hnd, NULL);
+
+//  printf("sq_poly_iteration called %d times.\n", c);
 
   save_png_to_file(&pic, "pic.png");
   free(pic.pixels);

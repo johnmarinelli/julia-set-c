@@ -9,7 +9,7 @@ SRCS_DIR = lib/src
 OBJFILES_DIR = dev/objfiles
 
 all: main.o julia.o
-	$(GCC) $(OBJFILES_DIR)/main.o $(OBJFILES_DIR)/julia.o $(CFLAGS) -o $(OUTPUT_BIN_NAME)
+	$(GCC) -I$(INCLUDE_DIR) $(OBJFILES_DIR)/main.o $(OBJFILES_DIR)/julia.o $(CFLAGS) -o $(OUTPUT_BIN_NAME)
 
 compile: main.o julia.o
 	$(GCC) -c $(OBJFILES_DIR)/main.o $(OBJFILES_DIR)/julia.o
