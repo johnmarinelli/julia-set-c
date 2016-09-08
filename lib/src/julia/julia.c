@@ -7,6 +7,8 @@
 #include "julia/types.h"
 #include "julia/julia.h"
 
+#include <unistd.h>
+
 //uint c = 0;
 
 void norm_coords(uint x, uint y, 
@@ -27,9 +29,10 @@ uint sq_poly_iteration(double r0, double i0, double rc, double ic, double radius
   uint i = 0;
   double last_zr = r0;
   double last_zi = i0;
-  double dis = 0.0;
+  double dis_sq = 0.0;
+  double radius_sq = radius * radius;
 
-  while (i < max_itrs && dis < radius) {
+  while (i < max_itrs && dis_sq < radius_sq) {
     // This is the actual julia function
     double a[2] = {};
     c_mult(last_zr, last_zi, last_zr, last_zi, a); // z^2
@@ -37,7 +40,7 @@ uint sq_poly_iteration(double r0, double i0, double rc, double ic, double radius
     c_add(a[0], a[1], rc, ic, b); // z^2 + c
     last_zr = b[0];
     last_zi = b[1];
-    dis = c_modulus(last_zr, last_zi);
+    dis_sq = last_zr * last_zr + last_zi * last_zi;
 //    ++c;
     ++i;
   }
@@ -51,7 +54,7 @@ void complex_heat_map(uint itrs, double min, double max, double zmod, double rad
   rgba[0] = 255.0;
   rgba[1] = abs((int)roundl(255.0 * new_value) % 256);
   rgba[2] = abs((int)roundl(255.0 * (1.0 - new_value)) % 256);
-  rgba[3] = abs((int)roundl(255.0 * (zmod_div_radius > 1.0 ? 1.0 : zmod_div_radius)) % 256);
+  //rgba[3] = abs((int)roundl(255.0 * (zmod_div_radius > 1.0 ? 1.0 : zmod_div_radius)) % 256);
 }
 
 // Critical section.
@@ -91,11 +94,7 @@ void julia(uint start_x, uint start_y,
       norm_coords(x, y, r_min, x_step, y_step, zoom_amt, x_off, y_off, new_coords);
       itrs = sq_poly_iteration(new_coords[0], new_coords[1], rc, ic, radius, max_itrs);
       complex_heat_map(itrs, 0, max_itrs, zmod, radius, rgba);
-      
-      int x_offset = x - start_x;
-      int y_offset = y - start_y;
-
-      insert_to_ary(bitmap, x_offset, y_offset, rgba, mtx);
+      insert_to_ary(bitmap, x, y, rgba, mtx);
     }
   }
 }
@@ -103,6 +102,7 @@ void julia(uint start_x, uint start_y,
 /* main() for a thread */
 void* thread_fn(void* vargs) {
   thread_fn_args* args = (thread_fn_args*) vargs;
+  printf("Start: (%d, %d) | End: (%d, %d)\n", args->start_x, args->start_y, args->end_x, args->end_y);
   julia(args->start_x, args->start_y, 
       args->end_x, args->end_y, 
       args->rc, args->ic, 
@@ -113,6 +113,13 @@ void* thread_fn(void* vargs) {
       args->bitmap,
       args->mtx);
 }
+
+const uint NUM_THREADS = 4;
+
+typedef struct j_threads {
+  thread_fn_args args[NUM_THREADS];
+  pthread_t t_hnds[NUM_THREADS];
+} j_threads;
 
 void start(uint total_width, uint total_height, 
     double rc, double ic,
@@ -125,20 +132,26 @@ void start(uint total_width, uint total_height,
   uint end_x = total_width;
   uint end_y = total_height;
 
-  const uint NUM_THREADS = 4;
+  uint i = 0;
 
-  // todo: implement map & reduce
+  // initialize bitmap
+  pic.width = total_width;
+  pic.height = total_height;
+
+  pic.pixels = calloc(pic.width * pic.height, sizeof(color_t));
+
+  pthread_mutex_t mtx;
+  pthread_mutex_init(&mtx, NULL);
 
   pthread_t t_hnd;
-  pthread_mutex_t mtx;
-  
+
   thread_fn_args thread_args;
 
   thread_args.mtx = &mtx;
-  thread_args.start_x = start_x;
-  thread_args.start_y = start_y;
-  thread_args.end_x = end_x;
-  thread_args.end_y = end_y;
+  thread_args.start_x = 0;
+  thread_args.start_y = 0;
+  thread_args.end_x = total_width;
+  thread_args.end_y = total_height;
   thread_args.total_width = total_width; 
   thread_args.total_height = total_height; 
   thread_args.rc = rc; 
@@ -149,17 +162,54 @@ void start(uint total_width, uint total_height,
   thread_args.max_itrs = max_itrs; 
   thread_args.bitmap = &pic;
 
-  pic.width = total_width;
-  pic.height = total_height;
+  /*
+  j_threads threads;
 
-  pic.pixels = calloc(pic.width * pic.height, sizeof(color_t));
+  threads.args[0].start_x = 0;
+  threads.args[0].start_y = 0;
+  threads.args[0].end_x = total_width / 2;
+  threads.args[0].end_y = total_height / 2;
 
-  pthread_mutex_init(&mtx, NULL);
+  threads.args[1].start_x = total_width / 2;
+  threads.args[1].start_y = 0;
+  threads.args[1].end_x = total_width;
+  threads.args[1].end_y = total_height / 2;
+  
+  threads.args[2].start_x = 0;
+  threads.args[2].start_y = total_height / 2;
+  threads.args[2].end_x = total_width / 2;
+  threads.args[2].end_y = total_height;
+
+  threads.args[3].start_x = total_width / 2;
+  threads.args[3].start_y = total_height / 2;
+  threads.args[3].end_x = total_width;
+  threads.args[3].end_y = total_height;
+  
+  //thread_fn_args thread_args;
+  for (i = 0; i < NUM_THREADS; ++i) {
+    threads.args[i].mtx = &mtx;
+    threads.args[i].total_width = total_width; 
+    threads.args[i].total_height = total_height; 
+    threads.args[i].rc = rc; 
+    threads.args[i].ic = ic; 
+    threads.args[i].zoom_amt = zoom_amt; 
+    threads.args[i].x_off = x_off; 
+    threads.args[i].y_off = y_off; 
+    threads.args[i].max_itrs = max_itrs; 
+    threads.args[i].bitmap = &pic;
+  }
+
+  for (i = 0; i < NUM_THREADS; ++i) {
+    pthread_create(&threads.t_hnds[i], NULL, thread_fn, &threads.args[i]);
+  }
+
+  for (i = 0; i < NUM_THREADS; ++i) {
+    int e = pthread_join(threads.t_hnds[i], NULL);
+  }
+  */
+
   pthread_create(&t_hnd, NULL, thread_fn, &thread_args);
-
   pthread_join(t_hnd, NULL);
-
-//  printf("sq_poly_iteration called %d times.\n", c);
 
   save_png_to_file(&pic, "pic.png");
   free(pic.pixels);
