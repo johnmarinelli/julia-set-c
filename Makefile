@@ -1,8 +1,9 @@
 GCC = gcc
 GPP = g++
 CFLAGS = -Wall -lm -lpng -lz -lpthread -g
+APPLE_OPENGL_FLAGS = -framework OpenGL -framework GLUT
 INCLUDE_DIR = lib/include
-OUTPUT_BIN_NAME = julia
+OUTPUT_BIN_NAME = mkjl
 OUTPUT_TEST_BIN_NAME = test_julia
 OUTPUT_BENCH_BIN_NAME = bench_julia
 SRCS_DIR = lib/src
@@ -21,7 +22,7 @@ test: julia.o
 	$(GPP) -I$(INCLUDE_DIR) -I$(GTEST_DIR)/include test/testmain.cc test/julia_test.cc $(SRCS_DIR)/julia/julia.c $(GTEST_ARCHIVE) $(GTEST_MAIN_ARCHIVE) $(CFLAGS) -lpthread -o $(OUTPUT_TEST_BIN_NAME)
 
 main.o: $(SRCS_DIR)/main.c
-	$(GCC) -c -I$(INCLUDE_DIR) $(SRCS_DIR)/main.c -o $(OBJFILES_DIR)/main.o -g
+	$(GCC) -c -I$(INCLUDE_DIR) $(SRCS_DIR)/main.c $(APPLE_OPENGL_FLAGS) -o $(OBJFILES_DIR)/main.o -g
 
 julia.o: $(SRCS_DIR)/julia/julia.c
 	$(GCC) -c -I$(INCLUDE_DIR) $(SRCS_DIR)/julia/julia.c -o $(OBJFILES_DIR)/julia.o -g

@@ -1,3 +1,5 @@
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
 #include <stdio.h>
 #include "julia/julia.h"
 

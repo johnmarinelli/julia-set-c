@@ -3,5 +3,6 @@ runtests
 dev/objfiles
 test_julia
 bench_julia
+mkjl
 *.png
 
