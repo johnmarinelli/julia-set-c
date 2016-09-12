@@ -2,31 +2,6 @@
 #include "julia/julia.h"
 #include "render/render.h"
 
-int32_t init_render(GLFWwindow* window, uint32_t width, uint32_t height, const char* title) {
-  int32_t status = 0;
-
-  if (!glfwInit()) {
-    status = -1;
-  }
-
-  window = glfwCreateWindow(width, height, title, NULL, NULL);
-
-  if (!window) {
-    glfwTerminate();
-    status = -1;
-  }
-
-  if (-1 != status) {
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-  }
-
-  return status;
-}
-
 int main(int argc, char* args[]) {
   printf("hello");
   int total_width = 100,//atoi(args[1]),
