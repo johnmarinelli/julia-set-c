@@ -34,6 +34,6 @@ typedef struct {
   double zoom_amt;
   double x_off, y_off;
   int max_itrs;
-  bitmap_t* bitmap;
+  float* pixels;
 } thread_fn_args;
 #endif

@@ -18,8 +18,7 @@ void julia(uint, uint,
     uint, uint,
     double, double, double,
     uint,
-    bitmap_t*,
-    pthread_mutex_t*);
+    float*);
 
 void start(uint, uint, 
     double, double,

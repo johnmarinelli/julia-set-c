@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "math/complex.h"
-#include "png/png_write.h"
+#include "math/linmath.h"
+//#include "png/png_write.h"
 #include "julia/types.h"
 #include "julia/julia.h"
 
@@ -52,9 +53,8 @@ void complex_heat_map(uint itrs, double min, double max, double zmod, double rad
   double new_value = ((double)itrs - min) / (max - min);
   double zmod_div_radius = zmod / radius;
   rgba[0] = 255.0;
-  rgba[1] = abs((int)roundl(255.0 * new_value) % 256);
-  rgba[2] = abs((int)roundl(255.0 * (1.0 - new_value)) % 256);
-  //rgba[3] = abs((int)roundl(255.0 * (zmod_div_radius > 1.0 ? 1.0 : zmod_div_radius)) % 256);
+  rgba[1] = (int)roundl(255.0 * new_value) % 256;
+  rgba[2] = (int)roundl(255.0 * (1.0 - new_value)) % 256;
 }
 
 // Critical section.
@@ -68,14 +68,13 @@ void insert_to_ary(bitmap_t* bitmap, uint x_offset, uint y_offset, double* rgba,
   pthread_mutex_unlock(mtx);
 }
 
-void julia(uint start_x, uint start_y, 
-    uint end_x, uint end_y, 
+void julia(uint32_t start_x, uint32_t start_y, 
+    uint32_t end_x, uint32_t end_y, 
     double rc, double ic, 
-    uint total_width, uint total_height, 
+    uint32_t total_width, uint32_t total_height, 
     double zoom_amt, double x_off, double y_off,
-    uint max_itrs,
-    bitmap_t* bitmap,
-    pthread_mutex_t* mtx) {
+    uint32_t max_itrs,
+    float* pixels) {
   double radius = calculate_r(rc, ic);
   double r_min = radius * -1;
   double r_max = radius;
@@ -83,18 +82,25 @@ void julia(uint start_x, uint start_y,
   double y_step = fabs(r_max - r_min) / (double)total_height;
   double zmod = c_modulus(rc, ic);
   double new_coords[2] = {};
-  double rgba[4] = {};
+  double rgba[3] = {};
   int itrs = 0;
 
-  uint y = start_y,
+  uint32_t y = start_y,
       x;
+
+  uint32_t width = end_x - start_x;
 
   for (; y < end_y; ++y) {
     for (x = start_x; x < end_x; ++x) {
       norm_coords(x, y, r_min, x_step, y_step, zoom_amt, x_off, y_off, new_coords);
       itrs = sq_poly_iteration(new_coords[0], new_coords[1], rc, ic, radius, max_itrs);
       complex_heat_map(itrs, 0, max_itrs, zmod, radius, rgba);
-      insert_to_ary(bitmap, x, y, rgba, mtx);
+      uint32_t x_offset = x - start_x,
+               y_offset = y - start_y;
+      uint32_t idx_clamp_3s = (y_offset * width + x_offset) * 3;
+      pixels[idx_clamp_3s] = rgba[0] / 255.0;
+      pixels[idx_clamp_3s + 1] = rgba[1] / 255.0;
+      pixels[idx_clamp_3s + 2] = rgba[2] / 255.0;
     }
   }
 }
@@ -110,8 +116,7 @@ void* thread_fn(void* vargs) {
       args->zoom_amt, 
       args->x_off, args->y_off, 
       args->max_itrs, 
-      args->bitmap,
-      args->mtx);
+      args->pixels);
 }
 
 const uint NUM_THREADS = 4;
@@ -121,6 +126,7 @@ typedef struct j_threads {
   pthread_t t_hnds[NUM_THREADS];
 } j_threads;
 
+/*
 void start(uint total_width, uint total_height, 
     double rc, double ic,
     double zoom_amt, 
@@ -162,7 +168,6 @@ void start(uint total_width, uint total_height,
   thread_args.max_itrs = max_itrs; 
   thread_args.bitmap = &pic;
 
-  /*
   j_threads threads;
 
   threads.args[0].start_x = 0;
@@ -206,7 +211,6 @@ void start(uint total_width, uint total_height,
   for (i = 0; i < NUM_THREADS; ++i) {
     int e = pthread_join(threads.t_hnds[i], NULL);
   }
-  */
 
   pthread_create(&t_hnd, NULL, thread_fn, &thread_args);
   pthread_join(t_hnd, NULL);
@@ -214,4 +218,5 @@ void start(uint total_width, uint total_height,
   save_png_to_file(&pic, "pic.png");
   free(pic.pixels);
 }
+  */
 
