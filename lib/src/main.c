@@ -3,9 +3,8 @@
 #include "render/render.h"
 
 int main(int argc, char* args[]) {
-  printf("hello");
-  int total_width = 100,//atoi(args[1]),
-      total_height = 100,//atoi(args[2]),
+  int total_width = 500,
+      total_height = 500,
       width = total_width,
       height = total_height,
       start_x = 0,
@@ -14,11 +13,28 @@ int main(int argc, char* args[]) {
       end_y = start_y + height,
       max_itrs = 300;
 
-  double zoom_amt = 0.1,
-        x_off = 0.25,
-        y_off = 0.5,
+  double zoom_amt = 1.0,
+        x_off = 0.0,
+        y_off = 0.0,
         rc = -0.7,
         ic = 0.27015;
+
+  args_t input;
+  input.total_width = total_width;
+  input.total_height = total_height;
+  input.width = width;
+  input.height = height;
+  input.start_x = start_x;
+  input.start_y = start_y;
+  input.end_x = end_x;
+  input.end_y = end_y;
+  input.max_itrs = max_itrs;
+  input.zoom_amt = zoom_amt;
+  input.x_off = x_off;
+  input.y_off = y_off;
+  input.rc = rc;
+  input.ic = ic;
+
   const char* title = "Julia Set Explorer";
   float* pixels;
 
@@ -49,13 +65,7 @@ int main(int argc, char* args[]) {
 
     while (!glfwWindowShouldClose(window)) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      julia(start_x, start_y, 
-          end_x, end_y,
-          rc, ic,
-          width, height,
-          zoom_amt += -0.01, x_off, y_off,
-          max_itrs,
-          pixels);
+      julia(&input, pixels);
 
       glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
       glfwSwapBuffers(window);

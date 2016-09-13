@@ -68,33 +68,34 @@ void insert_to_ary(bitmap_t* bitmap, uint x_offset, uint y_offset, double* rgba,
   pthread_mutex_unlock(mtx);
 }
 
-void julia(uint32_t start_x, uint32_t start_y, 
-    uint32_t end_x, uint32_t end_y, 
-    double rc, double ic, 
-    uint32_t total_width, uint32_t total_height, 
-    double zoom_amt, double x_off, double y_off,
-    uint32_t max_itrs,
-    float* pixels) {
+void julia(args_t* args, float* pixels) {
+  double rc = args->rc;
+  double ic = args->ic;
+  uint32_t start_x = args->start_x;
+  uint32_t start_y = args->start_y;
+
   double radius = calculate_r(rc, ic);
   double r_min = radius * -1;
   double r_max = radius;
-  double x_step = fabs(r_max - r_min) / (double)total_width;
-  double y_step = fabs(r_max - r_min) / (double)total_height;
+  double x_step = fabs(r_max - r_min) / (double)args->total_width;
+  double y_step = fabs(r_max - r_min) / (double)args->total_height;
   double zmod = c_modulus(rc, ic);
   double new_coords[2] = {};
   double rgba[3] = {};
   int itrs = 0;
 
-  uint32_t y = start_y,
+  uint32_t y = args->start_y,
       x;
+  args->zoom_amt -= 0.1;
+  args->x_off += 0.01;
 
-  uint32_t width = end_x - start_x;
+  uint32_t width = args->end_x - start_x;
 
-  for (; y < end_y; ++y) {
-    for (x = start_x; x < end_x; ++x) {
-      norm_coords(x, y, r_min, x_step, y_step, zoom_amt, x_off, y_off, new_coords);
-      itrs = sq_poly_iteration(new_coords[0], new_coords[1], rc, ic, radius, max_itrs);
-      complex_heat_map(itrs, 0, max_itrs, zmod, radius, rgba);
+  for (; y < args->end_y; ++y) {
+    for (x = start_x; x < args->end_x; ++x) {
+      norm_coords(x, y, r_min, x_step, y_step, args->zoom_amt, args->x_off, args->y_off, new_coords);
+      itrs = sq_poly_iteration(new_coords[0], new_coords[1], rc, ic, radius, args->max_itrs);
+      complex_heat_map(itrs, 0, args->max_itrs, zmod, radius, rgba);
       uint32_t x_offset = x - start_x,
                y_offset = y - start_y;
       uint32_t idx_clamp_3s = (y_offset * width + x_offset) * 3;
@@ -105,7 +106,7 @@ void julia(uint32_t start_x, uint32_t start_y,
   }
 }
 
-/* main() for a thread */
+/* main() for a thread 
 void* thread_fn(void* vargs) {
   thread_fn_args* args = (thread_fn_args*) vargs;
   printf("Start: (%d, %d) | End: (%d, %d)\n", args->start_x, args->start_y, args->end_x, args->end_y);
@@ -126,7 +127,6 @@ typedef struct j_threads {
   pthread_t t_hnds[NUM_THREADS];
 } j_threads;
 
-/*
 void start(uint total_width, uint total_height, 
     double rc, double ic,
     double zoom_amt, 

@@ -36,4 +36,22 @@ typedef struct {
   int max_itrs;
   float* pixels;
 } thread_fn_args;
+
+typedef struct args_t {
+  uint32_t total_width,
+           total_height,
+           width,
+           height,
+           start_x,
+           start_y,
+           end_x,
+           end_y,
+           max_itrs;
+  double zoom_amt,
+         x_off,
+         y_off,
+         rc,
+         ic;
+} args_t;
+
 #endif
