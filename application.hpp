@@ -45,7 +45,8 @@ public:
     paused(false),
     zoom(1.0f),
     x_offset(0.0f),
-    y_offset(0.0f)
+    y_offset(0.0f),
+    time_offset(0.0f)
   {
   }
 
