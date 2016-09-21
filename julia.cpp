@@ -122,60 +122,60 @@ static const unsigned char palette[] =
 
 
 static const char *  fragment_shader_src =
-            "// Julia set renderer - Fragment Shader                                                \n"
-            "// Graham Sellers                                                                      \n"
-            "// OpenGL SuperBible                                                                   \n"
-            "#version 150 core                                                                      \n"
-            "                                                                                       \n"
-            "in vec2 initial_z;                                                                     \n"
-            "                                                                                       \n"
-            "out vec4 color;                                                                        \n"
-            "                                                                                       \n"
-            "uniform sampler1D tex_gradient;                                                        \n"
-            "uniform vec2 C;                                                                        \n"
-            "                                                                                       \n"
-            "void main(void)                                                                        \n"
-            "{                                                                                      \n"
-            "    vec2 Z = initial_z;                                                                \n"
-            "    int iterations = 0;                                                                \n"
-            "    const float threshold_squared = 16.0;                                              \n"
-            "    const int max_iterations = 256;                                                    \n"
-            "    while (iterations < max_iterations && dot(Z, Z) < threshold_squared) {             \n"
-            "        vec2 Z_squared;                                                                \n"
-            "        Z_squared.x = Z.x * Z.x - Z.y * Z.y;                                           \n"
-            "        Z_squared.y = 2.0 * Z.x * Z.y;                                                 \n"
-            "        Z = Z_squared + C;                                                             \n"
-            "        iterations++;                                                                  \n"
-            "    }                                                                                  \n"
-            "    if (iterations == max_iterations)                                                  \n"
-            "        color = vec4(0.0, 0.0, 0.0, 1.0);                                              \n"
-            "    else                                                                               \n"
-            "        color = texture(tex_gradient, float(iterations) / float(max_iterations));      \n"
-            "}                                                                                      \n";
+"// Julia set renderer - Fragment Shader                                                \n"
+"// Graham Sellers                                                                      \n"
+"// OpenGL SuperBible                                                                   \n"
+"#version 150 core                                                                      \n"
+"                                                                                       \n"
+"in vec2 initial_z;                                                                     \n"
+"                                                                                       \n"
+"out vec4 color;                                                                        \n"
+"                                                                                       \n"
+"uniform sampler1D tex_gradient;                                                        \n"
+"uniform vec2 C;                                                                        \n"
+"                                                                                       \n"
+"void main(void)                                                                        \n"
+"{                                                                                      \n"
+"    vec2 Z = initial_z;                                                                \n"
+"    int iterations = 0;                                                                \n"
+"    const float threshold_squared = 16.0;                                              \n"
+"    const int max_iterations = 256;                                                    \n"
+"    while (iterations < max_iterations && dot(Z, Z) < threshold_squared) {             \n"
+"        vec2 Z_squared;                                                                \n"
+"        Z_squared.x = Z.x * Z.x - Z.y * Z.y;                                           \n"
+"        Z_squared.y = 2.0 * Z.x * Z.y;                                                 \n"
+"        Z = Z_squared + C;                                                             \n"
+"        iterations++;                                                                  \n"
+"    }                                                                                  \n"
+"    if (iterations == max_iterations)                                                  \n"
+"        color = vec4(0.0, 0.0, 0.0, 1.0);                                              \n"
+"    else                                                                               \n"
+"        color = texture(tex_gradient, float(iterations) / float(max_iterations));      \n"
+"}                                                                                      \n";
 
 static const char * vertex_shader_src  =
-            "// Julia set renderer - Vertex Shader                                                  \n"
-            "// Graham Sellers                                                                      \n"
-            "// OpenGL SuperBible                                                                   \n"
-            "#version 150 core                                                                      \n"
-            "                                                                                       \n"
-            "// Zoom factor                                                                         \n"
-            "uniform float zoom;                                                                    \n"
-            "                                                                                       \n"
-            "// Offset vector                                                                       \n"
-            "uniform vec2 offset;                                                                   \n"
-            "                                                                                       \n"
-            "out vec2 initial_z;                                                                    \n"
-            "                                                                                       \n"
-            "void main(void)                                                                        \n"
-            "{                                                                                      \n"
-            "    const vec4 vertices[4] = vec4[4](vec4(-1.0, -1.0, 0.0, 1.0),                       \n"
-            "                                     vec4( 1.0, -1.0, 0.0, 1.0),                       \n"
-            "                                     vec4( 1.0,  1.0, 0.0, 1.0),                       \n"
-            "                                     vec4(-1.0,  1.0, 0.0, 1.0));                      \n"
-            "    initial_z = (vertices[gl_VertexID].xy * zoom) + offset;                            \n"
-            "    gl_Position = vertices[gl_VertexID];                                               \n"
-            "}                                                                                      \n";
+"// Julia set renderer - Vertex Shader                                                  \n"
+"// Graham Sellers                                                                      \n"
+"// OpenGL SuperBible                                                                   \n"
+"#version 150 core                                                                      \n"
+"                                                                                       \n"
+"// Zoom factor                                                                         \n"
+"uniform float zoom;                                                                    \n"
+"                                                                                       \n"
+"// Offset vector                                                                       \n"
+"uniform vec2 offset;                                                                   \n"
+"                                                                                       \n"
+"out vec2 initial_z;                                                                    \n"
+"                                                                                       \n"
+"void main(void)                                                                        \n"
+"{                                                                                      \n"
+"    const vec4 vertices[4] = vec4[4](vec4(-1.0, -1.0, 0.0, 1.0),                       \n"
+"                                     vec4( 1.0, -1.0, 0.0, 1.0),                       \n"
+"                                     vec4( 1.0,  1.0, 0.0, 1.0),                       \n"
+"                                     vec4(-1.0,  1.0, 0.0, 1.0));                      \n"
+"    initial_z = (vertices[gl_VertexID].xy * zoom) + offset;                            \n"
+"    gl_Position = vertices[gl_VertexID];                                               \n"
+"}                                                                                      \n";
 
 int compile_shaders(const char* vtx_shdr_txt, const char* frg_shdr_txt) {
   GLuint vtx_shader, frg_shader, programID;
@@ -186,7 +186,6 @@ int compile_shaders(const char* vtx_shdr_txt, const char* frg_shdr_txt) {
   frg_shader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(frg_shader, 1, &frg_shdr_txt, NULL);
   glCompileShader(frg_shader);
-
 
   programID = glCreateProgram();
   glAttachShader(programID, vtx_shader);
@@ -200,13 +199,12 @@ int compile_shaders(const char* vtx_shdr_txt, const char* frg_shdr_txt) {
   uniforms.offset = glGetUniformLocation(programID, "offset");
   uniforms.C      = glGetUniformLocation(programID, "C");
 
-  printf("%d %d %d\n", uniforms.zoom, uniforms.offset, uniforms.C);
-
   return programID;
 }
 
 
 int main(int argc, char* args[]) {
+  /*
 	// Initialise GLFW
 	if( !glfwInit() ) {
 		fprintf( stderr, "Failed to initialize GLFW\n" );
@@ -248,8 +246,8 @@ int main(int argc, char* args[]) {
   unsigned int programID;
   unsigned int iter = 300;
 
-	/* load and set the julia shader */
-  programID = compile_shaders(vertex_shader_src, fragment_shader_src);
+	/* load and set the julia shader 
+  programID = compile_shaders(vertex_shader_src, fragment_shader_src);*/
 
 	/* load the 1D palette texture */
   glGenTextures(1, &palette_texture);
