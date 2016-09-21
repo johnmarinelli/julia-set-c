@@ -68,7 +68,7 @@ void insert_to_ary(bitmap_t* bitmap, uint x_offset, uint y_offset, double* rgba,
   pthread_mutex_unlock(mtx);
 }
 
-void julia(args_t* args, float* pixels) {
+void julia(args_t* args, float* pixels, uint64_t ctr) {
   double rc = args->rc;
   double ic = args->ic;
   uint32_t start_x = args->start_x;
@@ -84,16 +84,22 @@ void julia(args_t* args, float* pixels) {
   double rgba[3] = {};
   int itrs = 0;
 
+  // Calculate animations over time
+  // Zoom: (1 - (1 / (x + 1)))
+  double zoom_amt = args->zoom_amt - (1.0 - (1.0 / (ctr + 1.0)));
+  double x_off = args->x_off - (1.0 - (1.0 / (ctr + 1.0)));
+  double y_off = args->y_off - (1.0 - (1.0 / (ctr + 1.0)));
+  printf("Counter: %d\n", ctr);
+  printf("Zoom amount: %f\n", zoom_amt);
+
   uint32_t y = args->start_y,
       x;
-  args->zoom_amt -= 0.1;
-  args->x_off += 0.01;
 
   uint32_t width = args->end_x - start_x;
 
   for (; y < args->end_y; ++y) {
     for (x = start_x; x < args->end_x; ++x) {
-      norm_coords(x, y, r_min, x_step, y_step, args->zoom_amt, args->x_off, args->y_off, new_coords);
+      norm_coords(x, y, r_min, x_step, y_step, zoom_amt, x_off, args->y_off, new_coords);
       itrs = sq_poly_iteration(new_coords[0], new_coords[1], rc, ic, radius, args->max_itrs);
       complex_heat_map(itrs, 0, args->max_itrs, zmod, radius, rgba);
       uint32_t x_offset = x - start_x,

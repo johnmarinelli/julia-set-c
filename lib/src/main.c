@@ -3,8 +3,8 @@
 #include "render/render.h"
 
 int main(int argc, char* args[]) {
-  int total_width = 500,
-      total_height = 500,
+  int total_width = 250,
+      total_height = 250,
       width = total_width,
       height = total_height,
       start_x = 0,
@@ -62,10 +62,11 @@ int main(int argc, char* args[]) {
 
   if (0 == status) {
     pixels = calloc(width * height * 3, sizeof(float));
+    uint64_t ctr = 0;
 
     while (!glfwWindowShouldClose(window)) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      julia(&input, pixels);
+      julia(&input, pixels, ++ctr);
 
       glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
       glfwSwapBuffers(window);
