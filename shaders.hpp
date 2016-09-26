@@ -34,6 +34,7 @@ namespace john {
     "        color = vec4(0.0, 0.0, 0.0, 1.0);                                              \n"
     "    else                                                                               \n"
     "        color = texture(tex_gradient, float(iterations) / float(max_iterations));      \n"
+    "    //color = vec4(1.0, 0.5, 0.25, 1.0);      \n"
     "}                                                                                      \n";
 
     static const char * vertex_shader_src  =
