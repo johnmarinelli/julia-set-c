@@ -1,4 +1,4 @@
-#include <png.h>
+#include <pngwriter.h>
 #include "application.hpp"
 
 #include <iostream>
@@ -29,148 +29,33 @@ int compile_shaders(const char* vtx_shdr_txt, const char* frg_shdr_txt) {
 
   return programID;
 }
-/*
+
 bool write_png_file(char* filename, float* pixels, uint32_t width, uint32_t height) 
 {
-  uint32_t i, j;
-  pngwriter png(width, height, 0,"test.png");
+  uint32_t x, y, ctr;
+  pngwriter png(width, height, 0, filename);
   printf("Width: %d Height: %d\n", width, height);
 
-  for (i = 0; i < height; ++i) { 
-    for (j = 0; j < width; ++j) { 
+  ctr = 0;
+
+  for (y = 0; y < height; ++y) { 
+    for (x = 0; x < width; ++x) { 
       float r, g, b;
-      uint32_t y_off = (0 == i ? i * width : (i * width) - 1);
-      uint32_t off = j * 3;
+      uint32_t y_off = y * width;
+      uint32_t off = y > 0 ? x * 3 - y :  x * 3;
 
-      r = pixels[y_off + off];
-      g = pixels[y_off + off + 1];
-      b = pixels[y_off + off + 2];
+      r = pixels[ctr];
+      g = pixels[ctr + 1];
+      b = pixels[ctr + 2];
 
-      if (i == 1 && j < 50) {
-        printf("Offset: %d\n", y_off + off);
-        printf("(%d, %d): [%f %f %f]\n", j, i, r, g, b);
-      }
-
-      png.plot(j, i, int(r * 65535), int(g * 65535), int(b * 65535));
+      png.plot(x, y, r, g, b);
+      ctr += 3;
     }
   }
 
   png.close();
   printf("Finished writing png.\n");
   return true;
-}*/
-
-bool write_png_file(const char* path, float* pixels, int width, int height) {
-  FILE* fp;
-  png_structp png_ptr = NULL;
-  png_infop info_ptr = NULL;
-  size_t x, y;
-  png_byte** row_pointers = NULL;
-  std::ofstream file;
-  uint32_t ctr = 0;
-
-  // `status` contains return value of this function.  
-  // default is failure.  it gets set to success on 
-  // valid write.
-  int status = -1;
-
-  int pixel_size = 3;
-  int depth = 8;
-
-  fp = fopen(path, "wb");
-  if (!fp) {
-    printf("Error opening file %s\n", path);
-    goto fopen_failed;
-  }
-
-  png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (NULL == png_ptr) {
-    goto png_create_write_struct_failed;
-  }
-    
-  info_ptr = png_create_info_struct (png_ptr);
-  if (NULL == info_ptr) {
-      goto png_create_info_struct_failed;
-  }
-
-  // Set up error handling
-  if (setjmp (png_jmpbuf (png_ptr))) {
-    goto png_failure;
-  }
-    
-  png_set_IHDR (png_ptr,
-                info_ptr,
-                width,
-                height,
-                depth,
-                PNG_COLOR_TYPE_RGB,
-                PNG_INTERLACE_NONE,
-                PNG_COMPRESSION_TYPE_DEFAULT,
-                PNG_FILTER_TYPE_DEFAULT);
-    
-
-  file.open("colors_bad.txt", std::ios::trunc);
-
-  /* Initialize rows of PNG. */
-
-  row_pointers = (png_byte**) png_malloc (png_ptr, height * sizeof (png_byte *));
-  for (y = 0; y < height; y++) {
-    png_byte *row = 
-        (png_byte*) png_malloc (png_ptr, sizeof (uint8_t) * width * pixel_size);
-    row_pointers[y] = row;
-    for (x = 0; x < width; x++) {
-      uint32_t r, g, b;
-      //uint32_t y_off = (0 == y ? y * width : (y * width) - 1);
-      uint32_t y_off = y * width;
-      uint32_t off = y > 0 ? x * 3 - y :  x * 3;
-
-      r = pixels[ctr] * 255;
-      g = pixels[ctr + 1] * 255;
-      b = pixels[ctr + 2] * 255;
-
-      *row++ = r;
-      *row++ = g;
-      *row++ = b;
-
-      /*
-      if (y == 512 && x > 350 && x < 400) {
-        printf("Offset: %d\n", y_off + off);
-        printf("(%d, %d): [%f %f %f]\n", x, y, r, g, b);
-        printf("%f %f %f\n", *row - 3, *row - 2, *row - 1);
-      }
-      */
-
-      file << pixels[y_off + off] << ' ' << pixels[y_off + off + 1] << ' ' << pixels[y_off + off + 2] << ' ' << ctr << '\n';
-
-      ctr += 3;
-    }
-  }
-  file.close();
-    
-  /* Write the image data to "fp". */
-
-  png_init_io (png_ptr, fp);
-  png_set_rows (png_ptr, info_ptr, row_pointers);
-  png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
-
-  /* The routine has successfully written the file, so we set
-     "status" to a value which indicates success. */
-
-  status = 0;
-  printf("Writing png status: %d\n", status);
-  
-  for (y = 0; y < height; y++) {
-      png_free (png_ptr, row_pointers[y]);
-  }
-  png_free (png_ptr, row_pointers);
-    
-png_failure:
-png_create_info_struct_failed:
-  png_destroy_write_struct (&png_ptr, &info_ptr);
-png_create_write_struct_failed:
-  fclose (fp);
-fopen_failed:
-  return status;
 }
 
 john::Application::Application() :
@@ -337,31 +222,20 @@ bool john::Application::print_screen()
   // get width/height of window
   glGetIntegerv(GL_VIEWPORT, screen_stats);
 
-  // hold pixel data
-  //pixels = new float[screen_stats[2] * screen_stats[3] * 3];
-  pixels = new float[1024 * 768 * 3];
+  uint32_t width = screen_stats[2];
+  uint32_t height = screen_stats[3];
+  pixels = new float[width * height * 3];
   glReadPixels(
     0, 
     0, 
-    //screen_stats[2], 
-    //screen_stats[3], 
-    1024,
-    768,
+    width,
+    height,
     GL_RGB, 
     GL_FLOAT, 
     pixels
   );
 
-  std::ofstream file;
-  file.open("colors.txt", std::ios::trunc);
-  for (int i = 0; i < 1024 * 768 * 3; i += 3) {
-    file << pixels[i] << ' ' << pixels[i + 1] << ' ' << pixels[i+2] << '\n';
-  }
-
-  file.close();
-
-  //write_png_file("test.png", pixels, screen_stats[2], screen_stats[3]);
-  write_png_file("out.png", pixels, 1024, 768);
+  write_png_file("out.png", pixels, width, height);
 }
 
 void john::Application::shutdown() 
