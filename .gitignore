@@ -1,3 +1,5 @@
 *.o
 juliaglsl
 *.png
+*.jpg
+*.bmp
