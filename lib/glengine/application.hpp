@@ -65,28 +65,32 @@ protected:
     app->on_mouse(button, action);
   }
 
+  GLuint compile_shaders(const char* vtx_shdr_src, const char* frg_shdr_src);
 
 public:
   const uint32_t width = 1024;
   const uint32_t height = 768;
 
+  GLuint programID;
+  GLuint vao;
+  GLuint palette_texture;
+
+  GLFWwindow* window;
+
+  /*
   struct {
     GLint   zoom;
     GLint   offset;
     GLint   C;
   } uniforms;
 
-  GLuint programID;
-  GLuint vao;
-  GLuint palette_texture;
-
   bool paused;
   float time_offset;
   float zoom;
   float x_offset;
   float y_offset;
+  */
 
-  GLFWwindow* window;
 };
 
 }
