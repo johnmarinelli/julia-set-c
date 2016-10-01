@@ -1,7 +1,7 @@
 #ifndef JOHN_SHADERS_H
 #define JOHN_SHADERS_H
 
-namespace john {
+namespace julia {
 
   namespace shaders {
     static const char *  fragment_shader_src =

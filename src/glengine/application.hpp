@@ -11,8 +11,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "palettes.hpp" 
-#include "shaders.hpp" 
+#include "julia/palettes.hpp" 
+#include "julia/shaders.hpp" 
 
 namespace john
 {
@@ -31,15 +31,17 @@ public:
 
   virtual void run(john::Application* current_app);
 
-  virtual void render(double currentTime);
+  virtual void render(double currentTime) = 0;
 
   virtual void shutdown();
 
+  /*
   virtual void onKey(int key, int action);
 
   virtual void on_mouse(int button, int action);
 
   virtual void handle_click();
+  */
 
   bool print_screen();
 
@@ -48,7 +50,7 @@ protected:
 
   static void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mods)
   {
-    app->onKey(key, action);
+    app->on_key(key, action);
   }
 
   void get_mouse_position(int& x, int& y)
@@ -60,10 +62,14 @@ protected:
       y = static_cast<int>(floor(dy));
   }
 
+  virtual void on_key(int key, int action) = 0;
+
+  /*
   static void glfw_on_mouse(GLFWwindow* window, int button, int action, int mods)
   {
     app->on_mouse(button, action);
   }
+  */
 
   GLuint compile_shaders(const char* vtx_shdr_src, const char* frg_shdr_src);
 

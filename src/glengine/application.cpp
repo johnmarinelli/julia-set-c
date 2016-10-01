@@ -1,6 +1,6 @@
 #include <pngwriter.h>
-#include "application.hpp"
-#include "utilities.hpp"
+#include "glengine/application.hpp"
+#include "common/utilities.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -67,7 +67,7 @@ void john::Application::run(john::Application* current_app)
 
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, glfw_onKey);
-  glfwSetMouseButtonCallback(window, glfw_on_mouse);
+  //glfwSetMouseButtonCallback(window, glfw_on_mouse);
 
   /*glfwSetWindowSizeCallback(window, glfw_onResize);
   glfwSetCursorPosCallback(window, glfw_onMouseMove);
@@ -101,12 +101,12 @@ void john::Application::run(john::Application* current_app)
   glfwTerminate();
 }
 
+/*
 void john::Application::render(double currentTime) 
 {
   // Clear the screen
-  static const GLfloat color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-  glClearBufferfv(GL_COLOR, 0, color);
 
+  /*
   static float t = 0.0f;
   float r = 0.0f;
 
@@ -126,7 +126,9 @@ void john::Application::render(double currentTime)
 
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
+*/
 
+/*
 void john::Application::onKey(int key, int action) 
 {
   if (GLFW_PRESS == action) {
@@ -139,7 +141,9 @@ void john::Application::onKey(int key, int action)
     }
   }
 }
+*/
 
+/*
 void john::Application::on_mouse(int button, int action) 
 {
   if (GLFW_MOUSE_BUTTON_1 == button) {
@@ -167,6 +171,7 @@ void john::Application::handle_click()
   glReadPixels(x, screen_stats[3] - y, 1, 1, GL_RGB, GL_FLOAT, pixels);
   printf("Value of pixel at (%d, %d): [%f %f %f]", x, y, pixels[0], pixels[1], pixels[2]);
 }
+*/
 
 bool john::Application::print_screen()
 {

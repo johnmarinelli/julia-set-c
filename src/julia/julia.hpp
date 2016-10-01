@@ -6,7 +6,7 @@
 namespace julia 
 {
 
-class Julia : protected john::Application
+class Julia : public john::Application
 {
 public:
   Julia();
@@ -17,11 +17,12 @@ public:
 
   void shutdown();
 
-  void on_key(int key, int action);
-
   void on_mouse(int button, int action);
 
   void handle_click();
+
+protected:
+  void on_key(int key, int action);
 
 private:
   struct {
@@ -31,11 +32,11 @@ private:
   } uniforms;
 
   bool paused;
-  float time_offset;
   float zoom;
   float x_offset;
   float y_offset;
-}
+  float time_offset;
+};
 
 }
 
