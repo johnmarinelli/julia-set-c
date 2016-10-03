@@ -24,9 +24,17 @@ public:
 protected:
   void on_key(int key, int action);
 
+  void on_scroll(double x_scroll_offset, double y_scroll_offset);
+
+  void navigate(int key);
+
+  void control_speed(int key);
+
+  void cycle_palette();
+
 private:
   struct {
-    GLint   zoom;
+    GLfloat   zoom;
     GLint   offset;
     GLint   C;
   } uniforms;
@@ -36,6 +44,9 @@ private:
   float x_offset;
   float y_offset;
   float time_offset;
+
+  GLuint palette_texture2;
+
 };
 
 }

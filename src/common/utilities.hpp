@@ -28,7 +28,7 @@ namespace utilities
     return programID;
   }
 
-  bool write_png_file(char* filename, float* pixels, uint32_t width, uint32_t height) 
+  bool write_png_file(const char* filename, float* pixels, uint32_t width, uint32_t height) 
   {
     uint32_t x, y, ctr;
     pngwriter png(width, height, 0, filename);
